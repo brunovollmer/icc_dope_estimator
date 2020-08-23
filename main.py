@@ -14,6 +14,8 @@ if __name__=="__main__":
     group.add_argument('--image', type=str, help='path to the image')
     group.add_argument('--video', type=str, help='path to video')
 
+    parser.add_argument('--visualize', '-v', action='store_true', help='visualize results')
+
     parser.add_argument('--no_half_comp', action='store_true', help='disable half computation')
 
     args = parser.parse_args()
@@ -26,7 +28,10 @@ if __name__=="__main__":
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        results = dope.run(image, visualize=True)
+        results = dope.run(image, visualize=args.visualize)
+
+        print('number of detected poses: {}'.format(len(results['body'])))
+
 
         cv2.destroyAllWindows()
 
@@ -39,10 +44,12 @@ if __name__=="__main__":
             if not ret:
                 break
 
-            frame = resize_image(frame, width=500)
+            frame = resize_image(frame, width=1000)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            results = dope.run(frame, visualize=True)
+            results = dope.run(frame, visualize=args.visualize)
+
+            print(results)
 
 
         cap.release()
