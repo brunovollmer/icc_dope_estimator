@@ -101,12 +101,27 @@ def visualize_bodyhandface2d(im, dict_poses2d, dict_scores=None, lw=2, max_paddi
     return imout
 
 
+joint_to_kpt = {
+    0: 2,
+    1: 3,
+    2: 4,
+    3: 5,
+    4: 8,
+    5: 9,
+    6: 10,
+    7: 11
+}
 def visualize_differences(image, pose, differences):
     print(differences)
 
     for i, d in enumerate(differences[0]):
         if d:
             p = tuple(pose["body"][0, i])
-            cv2.circle(image, p, 10, (255, 0, 0), thickness=-1)
+            cv2.circle(image, p, 10, (255, 0, 0), thickness=2)
+    for i, d, in enumerate(differences[1][:8]):
+        if d:
+            p = tuple(pose["body"][0, joint_to_kpt[i]])
+            cv2.line(image, (int(p[0] - 7), int(p[1] - 7)), (int(p[0] + 7), int(p[1] + 7)), (0, 255, 0), thickness=2)
+            cv2.line(image, (int(p[0] - 7), int(p[1] + 7)), (int(p[0] + 7), int(p[1] - 7)), (0, 255, 0), thickness=2)
 
     return image

@@ -59,7 +59,7 @@ class Comparator:
         root2 = get_root_point(pose2)
 
         position_dist = np.linalg.norm((pose1 - root1) - (pose2 - root2), axis=1)
-        angle_dist = get_joint_angles(pose1) - get_joint_angles(pose2)
+        angle_dist = np.abs(get_joint_angles(pose1) - get_joint_angles(pose2))
 
         return position_dist > self.position_threshold, angle_dist > self.angle_threshold
 
