@@ -17,7 +17,7 @@ except ModuleNotFoundError:
 
 from model import dope_resnet50, num_joints
 from postprocess import assign_hands_and_head_to_body
-from visu import visualize_bodyhandface2d
+from visualization import visualize_bodyhandface2d
 
 
 class DopeEstimator:
