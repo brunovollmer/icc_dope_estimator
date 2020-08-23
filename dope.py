@@ -67,8 +67,6 @@ class DopeEstimator:
         # assignment of hands and head to body
         detections, hand_body, face_body = assign_hands_and_head_to_body(detections)
 
-        print(hand_body)
-
         if filter_poses:
             body_scores = [x['score'] for x in detections['body']]
             max_score_index = body_scores.index(max(body_scores))
