@@ -88,7 +88,7 @@ if __name__=="__main__":
                 merg_res_img = cv2.hconcat([master_res_img, user_res_img, plot_image[...,:3]])
 
                 cv2.imshow("result", merg_res_img)
-                cv2.waitKey(0)
+                cv2.waitKey(1)
 
 
         master_cap.release()
