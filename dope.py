@@ -52,7 +52,7 @@ class DopeEstimator:
         self._model = model
         self._ckpt = ckpt
 
-    def _post_process(self, results):
+    def _post_process(self, results, filter_poses):
 
         parts = ['body', 'hand', 'face']
 
@@ -65,7 +65,19 @@ class DopeEstimator:
                 res[part+'_scores'], res['boxes'], res[part+'_pose2d'], res[part+'_pose3d'], self._resolution, **self._ckpt[part+'_ppi_kwargs'])
 
         # assignment of hands and head to body
-        detections = assign_hands_and_head_to_body(detections)
+        detections, hand_body, face_body = assign_hands_and_head_to_body(detections)
+
+        print(hand_body)
+
+        if filter_poses:
+            body_scores = [x['score'] for x in detections['body']]
+            max_score_index = body_scores.index(max(body_scores))
+
+            detections['body'] = [detections['body'][max_score_index]]
+            detections['face'] = [detections['face'][face_body[max_score_index]]] if face_body[max_score_index] != -1 else []
+            detections['hand'] = [detections['hand'][x] if x != -1 else [] for x in list(hand_body[max_score_index])]
+            # # remove empty lists
+            detections['hand'] = [x for x in detections['hand'] if x != []]
 
         return detections
 
@@ -83,7 +95,7 @@ class DopeEstimator:
 
         cv2.waitKey(0)
 
-    def run(self, image, visualize=False):
+    def run(self, image, visualize=False, filter_poses=True):
         # convert to PIL image
         image = Image.fromarray(image)
 
@@ -97,7 +109,7 @@ class DopeEstimator:
         with torch.no_grad():
             results = self._model(tensor_list, None)[0]
 
-        post_proc_results = self._post_process(results)
+        post_proc_results = self._post_process(results, filter_poses)
 
         if visualize:
             self._visualize_results(post_proc_results, image)

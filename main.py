@@ -30,9 +30,6 @@ if __name__=="__main__":
 
         results = dope.run(image, visualize=args.visualize)
 
-        print('number of detected poses: {}'.format(len(results['body'])))
-
-
         cv2.destroyAllWindows()
 
     else:
@@ -48,9 +45,6 @@ if __name__=="__main__":
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             results = dope.run(frame, visualize=args.visualize)
-
-            print(results)
-
 
         cap.release()
         cv2.destroyAllWindows()
