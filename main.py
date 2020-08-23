@@ -102,6 +102,16 @@ if __name__=="__main__":
 
             user_results, user_res_img = dope.run(user_frame, visualize=args.visualize)
 
+            differences = comparator.compare(master_results['body'][0]['pose3d'], user_results["body"][0]["pose3d"])
+
+            user_result2d = {
+                part: np.stack([d['pose2d'] for d in part_detections], axis=0)
+                if len(part_detections) > 0
+                else np.empty((0, num_joints[part], 2), dtype=np.float32)
+                for part, part_detections in user_results.items()
+            }
+
+            user_res_img = visualize_differences(user_res_img, user_result2d, differences)
 
             if args.visualize:
                 merg_res_img = cv2.hconcat([master_res_img, user_res_img])
