@@ -7,9 +7,9 @@ from dope import DopeEstimator
 from comparator import Comparator
 from model import num_joints
 from util import resize_image
-from visualization import visualize_bodyhandface2d, visualize_differences
+from visualization import visualize_bodyhandface2d, visualize_differences, visualize_3d_pose
 
-if __name__=="__main__":
+def parse_args():
     parser = argparse.ArgumentParser(description='running DOPE on an image: python dope.py --model <modelname> --image <imagename>')
 
     parser.add_argument('--model', required=True, type=str, help='name of the model to use (eg DOPE_v1_0_0)')
@@ -30,12 +30,18 @@ if __name__=="__main__":
 
     args = parser.parse_args()
 
+    return args
+
+if __name__=="__main__":
+
+    args = parse_args()
+
     dope = DopeEstimator(args.model, not args.no_half_comp)
     comparator = Comparator(args.position_threshold, args.angle_threshold)
 
     if args.image:
         image = cv2.imread(args.image)
-        image = resize_image(image, width=args.width)
+        image = resize_image(image, width=int(args.width))
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -54,12 +60,12 @@ if __name__=="__main__":
             if not master_ret or not user_ret:
                 break
 
-            master_frame = resize_image(master_frame, height=args.width)
+            master_frame = resize_image(master_frame, height=int(args.width))
             master_frame = cv2.cvtColor(master_frame, cv2.COLOR_BGR2RGB)
 
             master_results, master_res_img = dope.run(master_frame, visualize=args.visualize)
 
-            user_frame = resize_image(user_frame, height=args.width)
+            user_frame = resize_image(user_frame, height=int(args.width))
             user_frame = cv2.cvtColor(user_frame, cv2.COLOR_BGR2RGB)
 
             user_results, user_res_img = dope.run(user_frame, visualize=args.visualize)
@@ -76,10 +82,14 @@ if __name__=="__main__":
             user_res_img = visualize_differences(user_res_img, user_result2d, differences)
 
             if args.visualize:
-                merg_res_img = cv2.hconcat([master_res_img, user_res_img])
+                plot_image = visualize_3d_pose(user_results['body'][0]['pose3d'])
+                plot_image = resize_image(plot_image, height=int(args.width))
+
+                merg_res_img = cv2.hconcat([master_res_img, user_res_img, plot_image[...,:3]])
 
                 cv2.imshow("result", merg_res_img)
-                cv2.waitKey(1)
+                cv2.waitKey(0)
+
 
         master_cap.release()
         user_cap.release()
