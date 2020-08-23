@@ -56,6 +56,8 @@ if __name__=="__main__":
     group.add_argument('--image', type=str, help='path to the image')
     group.add_argument('--video', type=str, help='path to video')
 
+    parser.add_argument('--m_video', type=str, help='path to master video')
+
     parser.add_argument('--visualize', '-v', action='store_true', help='visualize results')
 
     parser.add_argument('--no_half_comp', action='store_true', help='disable half computation')
@@ -80,33 +82,51 @@ if __name__=="__main__":
         cv2.destroyAllWindows()
 
     else:
-        cap = cv2.VideoCapture(args.video)
+        master_cap = cv2.VideoCapture(args.m_video)
+        user_cap = cv2.VideoCapture(args.video)
 
-        while(cap.isOpened()):
-            ret, frame = cap.read()
+        while(master_cap.isOpened()):
+            master_ret, master_frame = master_cap.read()
+            user_ret, user_frame = user_cap.read()
 
-            if not ret:
+            if not master_ret or not user_ret:
                 break
 
-            frame = resize_image(frame, width=args.width)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            master_frame = resize_image(master_frame, height=args.width)
+            master_frame = cv2.cvtColor(master_frame, cv2.COLOR_BGR2RGB)
 
-            results = dope.run(frame)
-            differences = comparator.compare(dummy_master_pose3d, results["body"][0]["pose3d"])
+            master_results, master_res_img = dope.run(master_frame, visualize=args.visualize)
+
+            user_frame = resize_image(user_frame, height=args.width)
+            user_frame = cv2.cvtColor(user_frame, cv2.COLOR_BGR2RGB)
+
+            user_results, user_res_img = dope.run(user_frame, visualize=args.visualize)
+
 
             if args.visualize:
-                result2d = {
-                    part: np.stack([d['pose2d'] for d in part_detections], axis=0)
-                    if len(part_detections) > 0
-                    else np.empty((0, num_joints[part], 2), dtype=np.float32)
-                    for part, part_detections in results.items()
-                }
-                master2d = {
-                    "hand": np.empty((0, num_joints["hand"], 2), dtype=np.float32),
-                    "face": np.empty((0, num_joints["face"], 2), dtype=np.float32),
-                    "body": np.expand_dims(dummy_master_pose2d, axis=0)
-                }
-                visualize_results(frame, master2d, result2d, differences)
+                merg_res_img = cv2.hconcat([master_res_img, user_res_img])
 
-        cap.release()
+                cv2.imshow("result", merg_res_img)
+                cv2.waitKey(1)
+
+
+
+            # differences = comparator.compare(dummy_master_pose3d, results["body"][0]["pose3d"])
+
+            # if args.visualize:
+            #     result2d = {
+            #         part: np.stack([d['pose2d'] for d in part_detections], axis=0)
+            #         if len(part_detections) > 0
+            #         else np.empty((0, num_joints[part], 2), dtype=np.float32)
+            #         for part, part_detections in results.items()
+            #     }
+            #     master2d = {
+            #         "hand": np.empty((0, num_joints["hand"], 2), dtype=np.float32),
+            #         "face": np.empty((0, num_joints["face"], 2), dtype=np.float32),
+            #         "body": np.expand_dims(dummy_master_pose2d, axis=0)
+            #     }
+            #     visualize_results(frame, master2d, result2d, differences)
+
+        master_cap.release()
+        user_cap.release()
         cv2.destroyAllWindows()

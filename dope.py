@@ -89,9 +89,7 @@ class DopeEstimator:
         res_img = visualize_bodyhandface2d(np.asarray(
             image)[:, :, ::-1], det_poses2d, dict_scores=scores)
 
-        cv2.imshow("result", res_img)
-
-        cv2.waitKey(0)
+        return res_img
 
     def run(self, image, visualize=False, filter_poses=True):
         # convert to PIL image
@@ -110,6 +108,7 @@ class DopeEstimator:
         post_proc_results = self._post_process(results, filter_poses)
 
         if visualize:
-            self._visualize_results(post_proc_results, image)
+            res_img = self._visualize_results(post_proc_results, image)
+            return post_proc_results, res_img
 
-        return post_proc_results
+        return post_proc_results, None
