@@ -63,7 +63,7 @@ if __name__=="__main__":
     parser.add_argument('--no_half_comp', action='store_true', help='disable half computation')
 
     parser.add_argument('--position_threshold', default=0.05)
-    parser.add_argument('--angle_threshold', default=0.5)
+    parser.add_argument('--angle_threshold', default=0.1)
     parser.add_argument('--width', default=500, help='width of the visualization display')
 
     args = parser.parse_args()
