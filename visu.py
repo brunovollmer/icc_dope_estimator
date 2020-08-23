@@ -98,4 +98,15 @@ def visualize_bodyhandface2d(im, dict_poses2d, dict_scores=None, lw=2, max_paddi
       
     if not bgr: imout = imout[:,:,::-1]
     
-    return imout 
+    return imout
+
+
+def visualize_differences(image, pose, differences):
+    print(differences)
+
+    for i, d in enumerate(differences[0]):
+        if d:
+            p = tuple(pose["body"][0, i])
+            cv2.circle(image, p, 10, (255, 0, 0), thickness=-1)
+
+    return image
