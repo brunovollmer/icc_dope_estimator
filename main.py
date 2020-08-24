@@ -27,6 +27,7 @@ def parse_args():
     parser.add_argument('--position_threshold', default=0.05)
     parser.add_argument('--angle_threshold', default=0.1)
     parser.add_argument('--width', default=500, help='width of the visualization display')
+    parser.add_argument('--save', action='store_true', help='save results')
 
     args = parser.parse_args()
 
@@ -52,6 +53,8 @@ if __name__=="__main__":
     else:
         master_cap = cv2.VideoCapture(args.m_video)
         user_cap = cv2.VideoCapture(args.video)
+
+        counter = 0
 
         while(master_cap.isOpened()):
             master_ret, master_frame = master_cap.read()
@@ -87,8 +90,13 @@ if __name__=="__main__":
 
                 merg_res_img = cv2.hconcat([master_res_img, user_res_img, plot_image[...,:3]])
 
+                if args.save:
+                    cv2.imwrite("{}.jpg".format(counter), merg_res_img)
+
                 cv2.imshow("result", merg_res_img)
                 cv2.waitKey(1)
+
+            counter += 1
 
 
         master_cap.release()
