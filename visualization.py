@@ -178,7 +178,7 @@ def visualize_bodyhandface2d(im, dict_poses2d, dict_scores=None, lw=2, max_paddi
 
     # for each part
     for part, poses2d in outposes2d.items():
-
+        if part != "body": continue
         # draw each detection
         for ipose in range(poses2d.shape[0]): # bones
             pose2d = poses2d[ipose,...]
@@ -223,3 +223,5 @@ def visualize_differences(image, pose, differences):
             cv2.line(image, (int(p[0] - 7), int(p[1] + 7)), (int(p[0] + 7), int(p[1] - 7)), (0, 255, 0), thickness=2)
 
     return image
+
+
