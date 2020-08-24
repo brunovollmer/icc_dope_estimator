@@ -91,7 +91,7 @@ if __name__=="__main__":
                 merg_res_img = cv2.hconcat([master_res_img, user_res_img, plot_image[...,:3]])
 
                 if args.save:
-                    cv2.imwrite("{}.jpg".format(counter), merg_res_img)
+                    cv2.imwrite("results/{:03d}.jpg".format(counter), merg_res_img)
 
                 cv2.imshow("result", merg_res_img)
                 cv2.waitKey(1)
