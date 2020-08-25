@@ -31,7 +31,10 @@ def parse_args():
     return args
 
 
-def make_img(master_frame, user_frame, user_pose, corrected_pose):
+def make_img(master_frame, user_frame, master_pose, user_pose, corrected_pose):
+    master_skeleton_img = visualize_3d_pose(master_pose)
+    master_skeleton_img = resize_image(master_skeleton_img, height=400)
+
     user_skeleton_img = visualize_3d_pose(user_pose)
     user_skeleton_img = resize_image(user_skeleton_img, height=400)
 
@@ -39,6 +42,7 @@ def make_img(master_frame, user_frame, user_pose, corrected_pose):
     correct_skeleton_img = resize_image(correct_skeleton_img, height=400)
 
     merg_skeleton_img = cv2.hconcat([
+        master_skeleton_img,
         correct_skeleton_img,
         user_skeleton_img,
     ])
@@ -78,6 +82,7 @@ if __name__=="__main__":
         user_cap = cv2.VideoCapture(args.video)
 
         user_results = []
+        master_results = []
 
         counter = 0
 
@@ -98,9 +103,11 @@ if __name__=="__main__":
 
             user_result, user_res_img = dope.run(user_frame, visualize=args.visualize)
 
+            master_results.append(master_result)
             user_results.append(user_result)
 
             differences = comparator.compare(master_result['body'][0]['pose3d'], user_result["body"][0]["pose3d"])
+            print("Frame", counter, differences)
 
             user_result2d = {
                 part: np.stack([d['pose2d'] for d in part_detections], axis=0)
@@ -114,9 +121,9 @@ if __name__=="__main__":
             if args.visualize:
                 user_pose3d = user_result["body"][0]["pose3d"]
                 master_pose3d = master_result["body"][0]["pose3d"]
-                corrected_pose = combine_poses(master_pose3d, user_pose3d, differences)
+                corrected_pose = combine_poses(master_pose3d, user_pose3d, ([], [True for i in range(14)]))
 
-                merg_img = make_img(master_res_img, user_res_img, user_pose3d, corrected_pose)
+                merg_img = make_img(master_res_img, user_res_img, master_pose3d, user_pose3d, corrected_pose)
 
                 if args.save_images:
                     cv2.imwrite("results/{:03d}.jpg".format(counter), merg_img)
@@ -127,7 +134,8 @@ if __name__=="__main__":
             counter += 1
 
         if args.save_poses:
-            save_json('results/poses.json', user_results)
+            save_json(f'results/{args.video}_poses.json', user_results)
+            save_json(f'results/{args.m_video}_poses.json', master_results)
 
         master_cap.release()
         user_cap.release()
