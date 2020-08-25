@@ -1,4 +1,6 @@
 import cv2
+import numpy as np
+import json
 
 def resize_image(image, width = None, height = None, inter = cv2.INTER_AREA):
         # initialize the dimensions of the image to be resized and
@@ -30,3 +32,14 @@ def resize_image(image, width = None, height = None, inter = cv2.INTER_AREA):
 
         # return the resized image
         return resized
+
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, np.float32):
+            return float(obj)
+        elif isinstance(obj, np.bool_):
+            return bool(obj)
+        return json.JSONEncoder.default(self, obj)
