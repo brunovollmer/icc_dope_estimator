@@ -69,13 +69,15 @@ class DopeEstimator:
 
         if filter_poses:
             body_scores = [x['score'] for x in detections['body']]
-            max_score_index = body_scores.index(max(body_scores))
 
-            detections['body'] = [detections['body'][max_score_index]]
-            detections['face'] = [detections['face'][face_body[max_score_index]]] if face_body[max_score_index] != -1 else []
-            detections['hand'] = [detections['hand'][x] if x != -1 else [] for x in list(hand_body[max_score_index])]
-            # # remove empty lists
-            detections['hand'] = [x for x in detections['hand'] if x != []]
+            if body_scores != []:
+                max_score_index = body_scores.index(max(body_scores))
+
+                detections['body'] = [detections['body'][max_score_index]]
+                detections['face'] = [detections['face'][face_body[max_score_index]]] if face_body[max_score_index] != -1 else []
+                detections['hand'] = [detections['hand'][x] if x != -1 else [] for x in list(hand_body[max_score_index])]
+                # # remove empty lists
+                detections['hand'] = [x for x in detections['hand'] if x != []]
 
         return detections
 
