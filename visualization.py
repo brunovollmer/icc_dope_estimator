@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 
+from constants import *
+
 def visualize_3d_pose(pose):
 
     fig = Figure(figsize=(5, 4), dpi=100)
@@ -16,22 +18,6 @@ def visualize_3d_pose(pose):
     X_I = 0
     Y_I = 1
     Z_I = 2
-
-    FOOT_LEFT = 0
-    FOOT_RIGHT = 1
-    KNEE_LEFT = 2
-    KNEE_RIGHT = 3
-    HIP_LEFT = 4
-    HIP_RIGHT = 5
-    HAND_LEFT = 6
-    HAND_RIGHT = 7
-    ELBOW_LEFT = 8
-    ELBOW_RIGHT = 9
-    SHOULDER_LEFT = 10
-    SHOULDER_RIGHT = 11
-    HEAD = 12
-    HIP_MIDDLE = 13
-    SHOULDER_MIDDLE = 14
 
     connections = [
         (FOOT_LEFT, KNEE_LEFT),
@@ -44,8 +30,8 @@ def visualize_3d_pose(pose):
         (ELBOW_LEFT, SHOULDER_LEFT),
         (ELBOW_RIGHT, SHOULDER_RIGHT),
         (SHOULDER_LEFT, SHOULDER_RIGHT),
-        (HIP_MIDDLE, SHOULDER_MIDDLE),
-        (SHOULDER_MIDDLE, HEAD)
+        (HIP, NECK),
+        (NECK, HEAD)
     ]
 
     rot_matrix_x = [
