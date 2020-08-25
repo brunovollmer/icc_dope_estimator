@@ -7,7 +7,7 @@ import numpy as np
 from dope import DopeEstimator
 from comparator import Comparator
 from model import num_joints
-from util import resize_image, NumpyEncoder
+from util import resize_image, save_json
 from visualization import visualize_bodyhandface2d, visualize_differences, visualize_3d_pose
 
 def parse_args():
@@ -99,9 +99,7 @@ if __name__=="__main__":
             counter += 1
 
         if args.save_poses:
-            with open('poses.json', 'w') as outfile:
-                json.dumps(user_results, outfile, cls=NumpyEncoder)
-
+            save_json('results/poses.json', user_results)
 
         master_cap.release()
         user_cap.release()

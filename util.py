@@ -43,3 +43,8 @@ class NumpyEncoder(json.JSONEncoder):
         elif isinstance(obj, np.bool_):
             return bool(obj)
         return json.JSONEncoder.default(self, obj)
+
+
+def save_json(path, data):
+    with open(path, 'w') as outfile:
+        json.dump(data, outfile, cls=NumpyEncoder)
