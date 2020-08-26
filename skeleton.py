@@ -99,6 +99,16 @@ class Skeleton:
         return pose
 
 
+def combine_poses(master_pose, user_pose, differences):
+    master_skeleton = Skeleton(master_pose)
+    user_skeleton = Skeleton(user_pose)
+    replace_rotations = {}
+    for joint in range(len(differences[1])):
+        if differences[1][joint]:
+            replace_rotations[joint] = master_skeleton.rotations[joint]
+    corrected_pose = user_skeleton.get_pose(replace_rotations)
+    return corrected_pose
+
 pose = 0.3 * np.array([
     [0.8, 0.1, 1],
     [-0.5, 0.1, 1],
