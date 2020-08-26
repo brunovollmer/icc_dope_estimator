@@ -18,6 +18,7 @@ except ModuleNotFoundError:
 from model import dope_resnet50, num_joints
 from postprocess import assign_hands_and_head_to_body
 from visualization import visualize_bodyhandface2d
+from constants import *
 
 
 class DopeEstimator:
@@ -52,7 +53,31 @@ class DopeEstimator:
         self._model = model
         self._ckpt = ckpt
 
-    def _post_process(self, results, filter_poses):
+    def _compute_rel_coord(self, results, img_size):
+        width = img_size[0]
+        height = img_size[1]
+
+        for e in results['body']:
+            for p in e['pose2d']:
+                p[0] = p[0]/width
+                p[1] = p[1]/height
+
+
+
+        return results
+
+    def _compute_hip_neck(self, results):
+
+        for pose in results['body']:
+
+            for key in ['pose2d', 'pose3d']:
+                pose[key] = np.append(pose[key], [(pose[key][HIP_LEFT]+pose[key][HIP_RIGHT])/2], axis=0)
+                pose[key] = np.append(pose[key], [(pose[key][SHOULDER_LEFT]+pose[key][SHOULDER_RIGHT])/2], axis=0)
+
+
+        return results
+
+    def _post_process(self, results, filter_poses, image):
 
         parts = ['body', 'hand', 'face']
 
@@ -63,6 +88,9 @@ class DopeEstimator:
         for part in parts:
             detections[part] = LCRNet_PPI_improved(
                 res[part+'_scores'], res['boxes'], res[part+'_pose2d'], res[part+'_pose3d'], self._resolution, **self._ckpt[part+'_ppi_kwargs'])
+
+        if len(detections['body']) == 0:
+            return detections
 
         # assignment of hands and head to body
         detections, hand_body, face_body = assign_hands_and_head_to_body(detections)
@@ -76,6 +104,9 @@ class DopeEstimator:
             detections['hand'] = [detections['hand'][x] if x != -1 else [] for x in list(hand_body[max_score_index])]
             # # remove empty lists
             detections['hand'] = [x for x in detections['hand'] if x != []]
+
+        detections = self._compute_hip_neck(detections)
+        detections = self._compute_rel_coord(detections, image.size)
 
         return detections
 
@@ -105,7 +136,7 @@ class DopeEstimator:
         with torch.no_grad():
             results = self._model(tensor_list, None)[0]
 
-        post_proc_results = self._post_process(results, filter_poses)
+        post_proc_results = self._post_process(results, filter_poses, image)
 
         if visualize:
             res_img = self._visualize_results(post_proc_results, image)
