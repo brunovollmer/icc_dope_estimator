@@ -107,9 +107,6 @@ class DopeEstimator:
                 # # remove empty lists
                 detections['hand'] = [x for x in detections['hand'] if x != []]
 
-        detections = self._compute_hip_neck(detections)
-        detections = self._compute_rel_coord(detections, image.size)
-
         return detections
 
     def _visualize_results(self, results, image):
@@ -143,5 +140,8 @@ class DopeEstimator:
         if visualize:
             res_img = self._visualize_results(post_proc_results, image)
             return post_proc_results, res_img
+
+        post_proc_results = self._compute_hip_neck(post_proc_results)
+        post_proc_results = self._compute_rel_coord(post_proc_results, image.size)
 
         return post_proc_results, None
