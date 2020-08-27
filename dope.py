@@ -68,7 +68,7 @@ class DopeEstimator:
 
     def _compute_hip_neck(self, results):
 
-        for pose in results[0]['body']:
+        for pose in results['body']:
 
             for key in ['pose2d', 'pose3d']:
                 print(pose[key])
@@ -138,11 +138,11 @@ class DopeEstimator:
 
         post_proc_results = self._post_process(results, filter_poses, image)
 
+        res_img = None
         if visualize:
             res_img = self._visualize_results(post_proc_results, image)
-            return post_proc_results, res_img
 
         post_proc_results = self._compute_hip_neck(post_proc_results)
         post_proc_results = self._compute_rel_coord(post_proc_results, image.size)
 
-        return post_proc_results, None
+        return post_proc_results, res_img
