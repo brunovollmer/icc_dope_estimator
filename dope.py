@@ -71,10 +71,10 @@ class DopeEstimator:
         for pose in results['body']:
 
             for key in ['pose2d', 'pose3d']:
-                print(pose[key])
+                #print(pose[key])
                 pose[key] = np.append(pose[key], [(pose[key][HIP_LEFT]+pose[key][HIP_RIGHT])/2], axis=0)
                 pose[key] = np.append(pose[key], [(pose[key][SHOULDER_LEFT]+pose[key][SHOULDER_RIGHT])/2], axis=0)
-                print(pose[key])
+                #print(pose[key])
 
         return results
 
