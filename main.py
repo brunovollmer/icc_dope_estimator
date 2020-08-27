@@ -73,7 +73,10 @@ if __name__=="__main__":
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        results = dope.run(image, visualize=args.visualize)
+        results, result_img = dope.run(image, visualize=args.visualize)
+
+        cv2.imshow("results image", result_img)
+        cv2.waitKey(0)
 
         cv2.destroyAllWindows()
 

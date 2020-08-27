@@ -54,9 +54,14 @@ def visualize_3d_pose(pose):
     ax.set_xlim([-1,1])
     ax.set_ylim([-1,1])
     ax.set_zlim([-1,1])
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-    ax.set_axis_off()
+    # Turn off tick labels
+    ax.set_yticklabels([])
+    ax.set_xticklabels([])
+    ax.set_zticklabels([])
+
+    # ax.get_xaxis().set_visible(False)
+    # ax.get_yaxis().set_visible(False)
+    # ax.set_axis_off()
 
     # add two extra points to pose
     pose = np.append(pose, [(pose[HIP_LEFT]+pose[HIP_RIGHT])/2], axis=0)
@@ -69,6 +74,7 @@ def visualize_3d_pose(pose):
 
     ax.scatter(xs, ys, zs)
 
+
     # plot all lines
 
     for c in connections:
@@ -79,9 +85,9 @@ def visualize_3d_pose(pose):
         ax.plot(x_l, y_l, z_l)
 
 
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
+    ax.set_xlabel('')
+    ax.set_ylabel('')
+    ax.set_zlabel('')
 
     #plt.show()
     canvas.draw()

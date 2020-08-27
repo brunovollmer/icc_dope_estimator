@@ -68,12 +68,13 @@ class DopeEstimator:
 
     def _compute_hip_neck(self, results):
 
-        for pose in results['body']:
+        for pose in results[0]['body']:
 
             for key in ['pose2d', 'pose3d']:
+                print(pose[key])
                 pose[key] = np.append(pose[key], [(pose[key][HIP_LEFT]+pose[key][HIP_RIGHT])/2], axis=0)
                 pose[key] = np.append(pose[key], [(pose[key][SHOULDER_LEFT]+pose[key][SHOULDER_RIGHT])/2], axis=0)
-
+                print(pose[key])
 
         return results
 
