@@ -110,7 +110,7 @@ if __name__=="__main__":
             user_results.append(user_result)
 
             differences = comparator.compare(master_result['body'][0]['pose3d'], user_result["body"][0]["pose3d"])
-            print("Frame", counter, differences)
+            print("Frame", counter)
 
             user_result2d = {
                 part: np.stack([d['pose2d'] for d in part_detections], axis=0)
