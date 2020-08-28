@@ -40,6 +40,9 @@ def compare_poses(master_poses, user_poses):
     #master_poses = normalize_skeleton(master_poses)
     #user_poses = normalize_skeleton(user_poses)
 
+    if len(master_poses) == 0 or len(user_poses) == 0:
+        return np.array([])
+
     master_poses, user_poses = align_poses(master_poses, user_poses)
 
     pose_scores = []
