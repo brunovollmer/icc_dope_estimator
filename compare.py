@@ -100,13 +100,14 @@ if __name__ == "__main__":
     print(f"Computed {len(scores)} scores, worst score {scores.max()}, best score {scores.min()}")
     print("Average scores per joint:")
     avg_scores = np.average(scores, axis=0)
-    print(avg_scores)
-    print(scores.shape)
-    print(scores)
+    for j in range(15):
+        print(f"{avg_scores[j]:.4f}")
 
+    score_colors = ["green", "yellow", "red"]
     for m, u, s in zip(master_poses, user_poses, scores):
+        joint_colors = [score_colors[_s] for _s in s]
         master_img = visualize_3d_pose(m)
-        user_img = visualize_3d_pose(u)
+        user_img = visualize_3d_pose(u, joint_colors=joint_colors)
         res_img = cv2.hconcat([master_img, user_img])
         cv2.imshow("Pose difference", res_img)
         cv2.waitKey(10)

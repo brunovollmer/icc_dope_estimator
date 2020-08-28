@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 
 from constants import *
 
-def visualize_3d_pose(pose):
+def visualize_3d_pose(pose, joint_colors="black"):
 
     fig = Figure(figsize=(5, 4), dpi=100)
     canvas = FigureCanvasAgg(fig)
@@ -64,15 +64,16 @@ def visualize_3d_pose(pose):
     # ax.set_axis_off()
 
     # add two extra points to pose
-    pose = np.append(pose, [(pose[HIP_LEFT]+pose[HIP_RIGHT])/2], axis=0)
-    pose = np.append(pose, [(pose[SHOULDER_LEFT]+pose[SHOULDER_RIGHT])/2], axis=0)
+    if pose.shape[0] == 13:
+        pose = np.append(pose, [(pose[HIP_LEFT]+pose[HIP_RIGHT])/2], axis=0)
+        pose = np.append(pose, [(pose[SHOULDER_LEFT]+pose[SHOULDER_RIGHT])/2], axis=0)
 
     # plot all points
     xs = [x[X_I] for x in pose]
     ys = [x[Y_I] for x in pose]
     zs = [x[Z_I] for x in pose]
 
-    ax.scatter(xs, ys, zs)
+    ax.scatter(xs, ys, zs, c=joint_colors)
 
 
     # plot all lines
