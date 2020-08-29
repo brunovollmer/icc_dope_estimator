@@ -39,6 +39,8 @@ def align_poses(master_poses, user_poses):
 def compare_poses(master_poses, user_poses):
     #master_poses = normalize_skeleton(master_poses)
     #user_poses = normalize_skeleton(user_poses)
+    master_poses = np.array(master_poses)
+    user_poses = np.array(user_poses)
 
     if len(master_poses) == 0 or len(user_poses) == 0:
         return np.array([])
