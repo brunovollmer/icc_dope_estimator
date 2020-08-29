@@ -7,6 +7,15 @@ THRESH_GOOD = 0.04
 THRESH_OK = 0.08
 THRESH_WRONG = 0.12
 
+PEN_PERFECT = 0
+PEN_GOOD = 1
+PEN_OK = 2
+PEN_WRONG = 3
+PEN_SHIT = 4
+PEN_NO_POSE = 0
+
+OFFSET_PERC = 0.1
+
 """
 Scale pose so that spine has roughly length 1
 """
@@ -23,51 +32,102 @@ def normalize_skeleton(poses):
 """
 Make sequences same length
 """
-def align_poses(master_poses, user_poses):
+def align_poses(master_poses, user_poses, fill_zero=True):
     length_diff = len(master_poses) - len(user_poses)
+
     if length_diff > 0:
-        print(f"Repeat last user pose {length_diff} times to match length")
-        user_poses += user_poses[-1] * length_diff
+
+        if fill_zero:
+            print(f"Add empty pose {length_diff} times to match length")
+            user_poses = np.append(user_poses, np.zeros((length_diff, user_poses[0].shape[0], user_poses[0].shape[1])), axis=0)
+        else:
+            print(f"Repeat last user pose {length_diff} times to match length")
+            user_poses += user_poses[-1] * length_diff
     elif length_diff < 0:
-        print(f"Repeat last master pose {-length_diff} times to match length")
-        master_poses += master_poses[-1] * -length_diff
+        length_diff = abs(length_diff)
+
+        if fill_zero:
+            print(f"Add empty pose {length_diff} times to match length")
+            master_poses = np.append(master_poses, np.zeros((length_diff, master_poses[0].shape[0], master_poses[0].shape[1])), axis=0)
+        else:
+            print(f"Repeat last master pose {-length_diff} times to match length")
+            master_poses += master_poses[-1] * -length_diff
     else:
         print("Lengths of sequences match")
     return master_poses, user_poses
 
+def shift_pose(pose, offset):
+    tmp_pose = np.zeros_like(pose)
 
-def compare_poses(master_poses, user_poses):
-    #master_poses = normalize_skeleton(master_poses)
-    #user_poses = normalize_skeleton(user_poses)
+    if offset > 0:
+        tmp_pose[offset:] = pose[:(pose.shape[0] - offset)]
 
-    if len(master_poses) == 0 or len(user_poses) == 0:
-        return np.array([])
+    elif offset < 0:
+        offset = abs(offset)
+        tmp_pose[:(pose.shape[0] - offset)] = pose[offset:]
 
-    master_poses, user_poses = align_poses(master_poses, user_poses)
+    if offset == 0:
+        return pose
 
-    pose_scores = []
+    return tmp_pose
+
+def compare_poses(master_poses, user_poses, offset=0):
+    user_poses = shift_pose(user_poses, offset)
+
     joint_scores = []
     for master_pose, user_pose in zip(master_poses, user_poses):
-        pose_diff = master_pose - user_pose
-        pose_diff -= pose_diff[ROOT_JOINT]
-        pose_dist = np.linalg.norm(pose_diff, axis=1)
 
-        scores = []
-        for d in pose_dist:
-            if d < THRESH_PERFECT:
-                score = 0
-            elif d < THRESH_GOOD:
-                score = 1
-            elif d < THRESH_OK:
-                score = 2
-            elif d < THRESH_WRONG:
-                score = 3
-            else:
-                score = 4
-            scores.append(score)
-        joint_scores.append(scores)
+        if np.sum(master_pose) != 0 and np.sum(user_pose) != 0:
+            pose_diff = master_pose - user_pose
+            pose_diff -= pose_diff[ROOT_JOINT]
+            pose_dist = np.linalg.norm(pose_diff, axis=1)
+
+            scores = []
+            for d in pose_dist:
+                if d < THRESH_PERFECT:
+                    score = PEN_PERFECT
+                elif d < THRESH_GOOD:
+                    score = PEN_GOOD
+                elif d < THRESH_OK:
+                    score = PEN_OK
+                elif d < THRESH_WRONG:
+                    score = PEN_WRONG
+                else:
+                    score = PEN_SHIT
+
+                scores.append(score)
+
+            joint_scores.append(scores)
+
+        else:
+            joint_scores.append([-1] * 15)
 
     return np.array(joint_scores)
+
+def findIdealOffset(master_poses, user_poses):
+    master_poses, user_poses = align_poses(master_poses, user_poses)
+
+    frames = master_poses.shape[0]
+
+    offset_list = list(range(int(-frames*OFFSET_PERC), int(frames*OFFSET_PERC)))
+    offset_results = []
+    offset_scores = []
+
+    for o in offset_list:
+        offset_result = compare_poses(master_poses, user_poses, offset=o)
+
+        offset_results.append(offset_result)
+        offset_scores.append(np.average(offset_result[offset_result >= 0]))
+
+    best_offset_index = offset_scores.index(min(offset_scores))
+    best_offset = offset_list[best_offset_index]
+    best_result = offset_results[best_offset_index]
+
+    print("best offset: {}".format(best_offset))
+
+    user_poses = shift_pose(user_poses, best_offset)
+
+    return best_result, master_poses, user_poses
 
 if __name__ == "__main__":
     import json
@@ -85,8 +145,13 @@ if __name__ == "__main__":
         print(f"Loading {path}...")
         with open(path) as f:
             data = json.load(f)
-        poses = [p["body"][0]["pose3d"] for p in data]
-        return np.array(poses)
+
+        poses = np.zeros((len(data), 15, 3))
+        for i, p in enumerate(data):
+            if p['body']:
+                poses[i] = np.array(p['body'][0]['pose3d'])
+
+        return poses
 
     master_poses = load_3d_poses(args.master_poses)
     user_poses = load_3d_poses(args.user_poses)
@@ -108,12 +173,15 @@ if __name__ == "__main__":
     print(f"Loaded {len(master_poses)} master poses, {len(user_poses)} user poses")
 
     print(f"Computing scores...")
-    scores = compare_poses(master_poses, user_poses)
+
+    scores, upd_master_poses, upd_user_poses = findIdealOffset(master_poses, user_poses)
+
+
     print(f"Computed {len(scores)} scores, worst score {scores.max()}, best score {scores.min()}")
     print("Average scores per joint:")
     avg_scores = np.average(scores, axis=0)
-    for j in range(15):
-        print(f"{avg_scores[j]:.4f}")
+    # for j in range(15):
+    #     print(f"{avg_scores[j]:.4f}")
 
     def nop(x):
         pass
@@ -142,8 +210,17 @@ if __name__ == "__main__":
         cur_scores = compare_poses(cur_master_pose, cur_user_pose)
 
         joint_colors = [score_colors[_s] for _s in cur_scores[0]]
-        master_img = visualize_3d_pose(cur_master_pose[0])
-        user_img = visualize_3d_pose(cur_user_pose[0], joint_colors=joint_colors)
+
+        if np.sum(cur_master_pose[0]) != 0:
+            master_img = visualize_3d_pose(cur_master_pose[0])
+        else:
+            master_img = np.zeros((400,500,4))
+
+        if np.sum(cur_user_pose[0]) != 0:
+            user_img = visualize_3d_pose(cur_user_pose[0], joint_colors=joint_colors)
+        else:
+            user_img = np.zeros((400,500,4))
+
         res_img = cv2.hconcat([master_img, user_img])
         res_img = cv2.cvtColor(res_img, cv2.COLOR_RGB2BGR)
         cv2.imshow("image", res_img[:, :, ::-1])
