@@ -115,7 +115,8 @@ def find_ideal_offset(master_poses, user_poses, timeshift_percentage=OFFSET_PERC
 
     frames = master_poses.shape[0]
 
-    offset_list = list(range(int(-frames*timeshift_percentage), int(frames*timeshift_percentage)))
+    #offset_list = list(range(int(-frames*timeshift_percentage), int(frames*timeshift_percentage)))
+    offset_list[0]
     offset_results = []
     offset_scores = []
 
@@ -180,7 +181,7 @@ if __name__ == "__main__":
 
     print(f"Computing scores...")
 
-    scores, upd_master_poses, upd_user_poses = find_ideal_offset(master_poses, user_poses)
+    scores, best_offset, upd_master_poses, upd_user_poses = find_ideal_offset(master_poses, user_poses)
 
 
     print(f"Computed {len(scores)} scores, worst score {scores.max()}, best score {scores.min()}")
