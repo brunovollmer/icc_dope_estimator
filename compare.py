@@ -116,7 +116,7 @@ def find_ideal_offset(master_poses, user_poses, timeshift_percentage=OFFSET_PERC
     frames = master_poses.shape[0]
 
     #offset_list = list(range(int(-frames*timeshift_percentage), int(frames*timeshift_percentage)))
-    offset_list[0]
+    offset_list = [0]
     offset_results = []
     offset_scores = []
 
