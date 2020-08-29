@@ -2,10 +2,16 @@ import numpy as np
 from constants import *
 
 
-THRESH_PERFECT = 0.02
-THRESH_GOOD = 0.04
-THRESH_OK = 0.08
-THRESH_WRONG = 0.12
+THRESH_PERFECT = 0.12
+THRESH_GOOD = 0.2
+THRESH_OK = 0.24
+THRESH_WRONG = 0.0
+DEFAULT_THRESHOLDS = {
+    "perfect": THRESH_PERFECT,
+    "good": THRESH_GOOD,
+    "ok": THRESH_OK,
+    "wrong": THRESH_WRONG
+}
 
 """
 Scale pose so that spine has roughly length 1
@@ -36,7 +42,7 @@ def align_poses(master_poses, user_poses):
     return master_poses, user_poses
 
 
-def compare_poses(master_poses, user_poses):
+def compare_poses(master_poses, user_poses, timeshift_percentage=0.1, thresholds=DEFAULT_THRESHOLDS):
     #master_poses = normalize_skeleton(master_poses)
     #user_poses = normalize_skeleton(user_poses)
     master_poses = np.array(master_poses)
@@ -56,13 +62,13 @@ def compare_poses(master_poses, user_poses):
 
         scores = []
         for d in pose_dist:
-            if d < THRESH_PERFECT:
+            if d < thresholds["perfect"]:
                 score = 0
-            elif d < THRESH_GOOD:
+            elif d < thresholds["good"]:
                 score = 1
-            elif d < THRESH_OK:
+            elif d < thresholds["ok"]:
                 score = 2
-            elif d < THRESH_WRONG:
+            elif d < thresholds["wrong"]:
                 score = 3
             else:
                 score = 4
@@ -130,7 +136,7 @@ if __name__ == "__main__":
     cv2.createTrackbar("wrong", "image", int(THRESH_WRONG * STEPS), STEPS, nop)
 
     cv2.createTrackbar("frame", "image", 0, num_frames, nop)
-    score_colors = ["#00ff00", "#66dd00", "#999900", "#aa6600", "#ff0000"]
+    score_colors = ["green", "blue", "yellow", "orange", "red"]
 
     while(1):
         THRESH_PERFECT = cv2.getTrackbarPos("perfect", "image") / STEPS
