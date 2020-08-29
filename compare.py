@@ -2,6 +2,11 @@ import numpy as np
 from constants import *
 
 
+THRESH_PERFECT = 0.02
+THRESH_GOOD = 0.04
+THRESH_OK = 0.08
+THRESH_WRONG = 0.12
+
 """
 Scale pose so that spine has roughly length 1
 """
@@ -35,6 +40,9 @@ def compare_poses(master_poses, user_poses):
     #master_poses = normalize_skeleton(master_poses)
     #user_poses = normalize_skeleton(user_poses)
 
+    if len(master_poses) == 0 or len(user_poses) == 0:
+        return np.array([])
+
     master_poses, user_poses = align_poses(master_poses, user_poses)
 
     pose_scores = []
@@ -46,12 +54,16 @@ def compare_poses(master_poses, user_poses):
 
         scores = []
         for d in pose_dist:
-            if d < 0.05:
+            if d < THRESH_PERFECT:
                 score = 0
-            elif d < 0.1:
+            elif d < THRESH_GOOD:
                 score = 1
-            else:
+            elif d < THRESH_OK:
                 score = 2
+            elif d < THRESH_WRONG:
+                score = 3
+            else:
+                score = 4
             scores.append(score)
         joint_scores.append(scores)
 
@@ -103,7 +115,44 @@ if __name__ == "__main__":
     for j in range(15):
         print(f"{avg_scores[j]:.4f}")
 
-    score_colors = ["green", "yellow", "red"]
+    def nop(x):
+        pass
+
+    num_frames = len(scores)
+    STEPS = 1000
+
+    cv2.namedWindow("image")
+    cv2.createTrackbar("perfect", "image", int(THRESH_PERFECT * STEPS), STEPS, nop)
+    cv2.createTrackbar("good", "image", int(THRESH_GOOD * STEPS), STEPS, nop)
+    cv2.createTrackbar("ok", "image", int(THRESH_OK * STEPS), STEPS, nop)
+    cv2.createTrackbar("wrong", "image", int(THRESH_WRONG * STEPS), STEPS, nop)
+
+    cv2.createTrackbar("frame", "image", 0, num_frames, nop)
+    score_colors = ["#00ff00", "#66dd00", "#999900", "#aa6600", "#ff0000"]
+
+    while(1):
+        THRESH_PERFECT = cv2.getTrackbarPos("perfect", "image") / STEPS
+        THRESH_GOOD = cv2.getTrackbarPos("good", "image") / STEPS
+        THRESH_OK = cv2.getTrackbarPos("ok", "image") / STEPS
+        THRESH_WRONG = cv2.getTrackbarPos("wrong", "image") / STEPS
+        cur_frame = cv2.getTrackbarPos("frame", "image")
+
+        cur_master_pose = np.array([master_poses[cur_frame]])
+        cur_user_pose = np.array([user_poses[cur_frame]])
+        cur_scores = compare_poses(cur_master_pose, cur_user_pose)
+
+        joint_colors = [score_colors[_s] for _s in cur_scores[0]]
+        master_img = visualize_3d_pose(cur_master_pose[0])
+        user_img = visualize_3d_pose(cur_user_pose[0], joint_colors=joint_colors)
+        res_img = cv2.hconcat([master_img, user_img])
+        res_img = cv2.cvtColor(res_img, cv2.COLOR_RGB2BGR)
+        cv2.imshow("image", res_img[:, :, ::-1])
+
+        k = cv2.waitKey(1) & 0xFF
+        if k == 27:
+            break
+
+    """
     for m, u, s in zip(master_poses, user_poses, scores):
         joint_colors = [score_colors[_s] for _s in s]
         master_img = visualize_3d_pose(m)
@@ -111,4 +160,5 @@ if __name__ == "__main__":
         res_img = cv2.hconcat([master_img, user_img])
         cv2.imshow("Pose difference", res_img)
         cv2.waitKey(10)
+    """
     cv2.destroyAllWindows()
