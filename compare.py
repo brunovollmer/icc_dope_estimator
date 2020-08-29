@@ -77,7 +77,7 @@ def shift_pose(pose, offset):
 
     return tmp_pose
 
-def compare_poses(master_poses, user_poses, offset=0):
+def compare_poses(master_poses, user_poses, thresholds, offset=0):
     user_poses = shift_pose(user_poses, offset)
 
     joint_scores = []
@@ -90,13 +90,13 @@ def compare_poses(master_poses, user_poses, offset=0):
 
             scores = []
             for d in pose_dist:
-                if d < THRESH_PERFECT:
+                if d < thresholds['perfect']:
                     score = PEN_PERFECT
-                elif d < THRESH_GOOD:
+                elif d < thresholds['good']:
                     score = PEN_GOOD
-                elif d < THRESH_OK:
+                elif d < thresholds['ok']:
                     score = PEN_OK
-                elif d < THRESH_WRONG:
+                elif d < thresholds['wrong']:
                     score = PEN_WRONG
                 else:
                     score = PEN_SHIT
@@ -110,17 +110,17 @@ def compare_poses(master_poses, user_poses, offset=0):
 
     return np.array(joint_scores)
 
-def findIdealOffset(master_poses, user_poses):
+def find_ideal_offset(master_poses, user_poses, timeshift_percentage=OFFSET_PERC, thresholds=DEFAULT_THRESHOLDS):
     master_poses, user_poses = align_poses(master_poses, user_poses)
 
     frames = master_poses.shape[0]
 
-    offset_list = list(range(int(-frames*OFFSET_PERC), int(frames*OFFSET_PERC)))
+    offset_list = list(range(int(-frames*timeshift_percentage), int(frames*timeshift_percentage)))
     offset_results = []
     offset_scores = []
 
     for o in offset_list:
-        offset_result = compare_poses(master_poses, user_poses, offset=o)
+        offset_result = compare_poses(master_poses, user_poses, thresholds, offset=o)
 
         offset_results.append(offset_result)
         offset_scores.append(np.average(offset_result[offset_result >= 0]))
@@ -133,7 +133,7 @@ def findIdealOffset(master_poses, user_poses):
 
     user_poses = shift_pose(user_poses, best_offset)
 
-    return best_result, master_poses, user_poses
+    return best_result, best_offset, master_poses, user_poses
 
 if __name__ == "__main__":
     import json
@@ -180,7 +180,7 @@ if __name__ == "__main__":
 
     print(f"Computing scores...")
 
-    scores, upd_master_poses, upd_user_poses = findIdealOffset(master_poses, user_poses)
+    scores, upd_master_poses, upd_user_poses = find_ideal_offset(master_poses, user_poses)
 
 
     print(f"Computed {len(scores)} scores, worst score {scores.max()}, best score {scores.min()}")
@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
         cur_master_pose = np.array([master_poses[cur_frame]])
         cur_user_pose = np.array([user_poses[cur_frame]])
-        cur_scores = compare_poses(cur_master_pose, cur_user_pose)
+        cur_scores = compare_poses(cur_master_pose, cur_user_pose, DEFAULT_THRESHOLDS)
 
         joint_colors = [score_colors[_s] for _s in cur_scores[0]]
 
