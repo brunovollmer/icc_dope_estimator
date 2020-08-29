@@ -66,7 +66,8 @@ class DopeEstimator:
 
         return results
 
-    def _compute_hip_neck(self, results):
+    @staticmethod
+    def _compute_hip_neck(results):
 
         for pose in results['body']:
 
