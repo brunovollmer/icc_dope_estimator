@@ -1,3 +1,5 @@
+Client for the ICC 2020 submission of the Covement Coach team.
+
 ### Getting started
 
 Our python3 code requires the following packages:
