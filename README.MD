@@ -1,4 +1,6 @@
-Client for the ICC 2020 submission of the Covement Coach team.
+# Movement Coach Pose Estimation
+
+Pose Estimation model for the ICC 2020 submission of the Covement Coach team.
 
 ### Getting started
 
