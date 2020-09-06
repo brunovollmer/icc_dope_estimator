@@ -1,6 +1,6 @@
 # Movement Coach Pose Estimation
 
-Pose Estimation model for the ICC 2020 submission of the Covement Coach team.
+Pose Estimation model for the ICC 2020 submission of the Movement Coach team.
 
 ### Getting started
 
