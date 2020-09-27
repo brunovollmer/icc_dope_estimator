@@ -2,6 +2,35 @@ import cv2
 import numpy as np
 import json
 
+def make_img(master_frame, user_frame, master_pose, user_pose, corrected_pose):
+    master_skeleton_img = visualize_3d_pose(master_pose)
+    master_skeleton_img = resize_image(master_skeleton_img, height=400)
+
+    user_skeleton_img = visualize_3d_pose(user_pose)
+    user_skeleton_img = resize_image(user_skeleton_img, height=400)
+
+    correct_skeleton_img = visualize_3d_pose(corrected_pose)
+    correct_skeleton_img = resize_image(correct_skeleton_img, height=400)
+
+    merg_skeleton_img = cv2.hconcat([
+        master_skeleton_img,
+        correct_skeleton_img,
+        user_skeleton_img,
+    ])
+    merg_res_img = cv2.hconcat([
+        master_frame,
+        user_frame,
+    ])
+
+    merg_skeleton_img = resize_image(merg_skeleton_img, width=merg_res_img.shape[1])
+    merg_img = cv2.vconcat([
+        merg_res_img,
+        merg_skeleton_img[..., :3]
+    ])
+    merg_img = resize_image(merg_img, width=args.width)
+
+    return merg_img
+
 def format_debug_times(timestamps):
     print("-----------------------")
     for i in range(len(timestamps)-1):

@@ -1,14 +1,10 @@
-# Copyright 2020-present NAVER Corp.
-# CC BY-NC-SA 4.0
-# Available only for non-commercial use
-
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 
-from constants import *
+from dope_estimator.constants import *
 
 def visualize_3d_pose(pose, joint_colors="black"):
 

@@ -1,6 +1,6 @@
 import numpy as np
-from constants import *
 
+from dope_estimator.constants import *
 
 def get_root_point(pose):
     mid_hip = pose[HIP_LEFT] - pose[HIP_RIGHT]

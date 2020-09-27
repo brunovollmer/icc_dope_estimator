@@ -8,17 +8,17 @@ from PIL import Image
 
 # add ppi repo to sys path and import it
 curr_dir = os.path.realpath(os.path.dirname(__file__))
-sys.path.append(os.path.join(curr_dir, 'lcrnet-v2-improved-ppi'))
+sys.path.append(os.path.join(curr_dir, '..', 'lib', 'lcrnet'))
 
 try:
     from lcr_net_ppi_improved import LCRNet_PPI_improved
 except ModuleNotFoundError:
     raise Exception('To use the pose proposals integration (ppi) as postprocessing, please follow the readme instruction by cloning our modified version of LCRNet_v2.0 here. Alternatively, you can use --postprocess nms without any installation, with a slight decrease of performance.')
 
-from model import dope_resnet50, num_joints
-from postprocess import assign_hands_and_head_to_body
-from visualization import visualize_bodyhandface2d
-from constants import *
+from dope_estimator.model import dope_resnet50, num_joints
+from dope_estimator.postprocess import assign_hands_and_head_to_body
+from dope_estimator.visualization import visualize_bodyhandface2d
+from dope_estimator.constants import *
 
 
 class DopeEstimator:

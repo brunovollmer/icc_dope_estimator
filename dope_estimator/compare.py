@@ -1,6 +1,6 @@
 import numpy as np
-from constants import *
 
+from dope_estimator.constants import *
 
 THRESH_PERFECT = 0.12
 THRESH_GOOD = 0.2

@@ -1,15 +1,13 @@
-import sys, os
 import argparse
-import cv2
-import json
 import numpy as np
+import cv2
 
-from dope import DopeEstimator
-from comparator import Comparator
-from model import num_joints
-from util import resize_image, save_json
-from visualization import visualize_bodyhandface2d, visualize_differences, visualize_3d_pose
-from skeleton import combine_poses
+from dope_estimator.dope import DopeEstimator
+from dope_estimator.comparator import Comparator
+from dope_estimator.model import num_joints
+from dope_estimator.util import resize_image, save_json, make_img
+from dope_estimator.visualization import visualize_differences
+from dope_estimator.skeleton import combine_poses
 
 def parse_args():
     parser = argparse.ArgumentParser(description='running DOPE on an image: python dope.py --model <modelname> --image <imagename>')
@@ -31,35 +29,6 @@ def parse_args():
     return args
 
 
-def make_img(master_frame, user_frame, master_pose, user_pose, corrected_pose):
-    master_skeleton_img = visualize_3d_pose(master_pose)
-    master_skeleton_img = resize_image(master_skeleton_img, height=400)
-
-    user_skeleton_img = visualize_3d_pose(user_pose)
-    user_skeleton_img = resize_image(user_skeleton_img, height=400)
-
-    correct_skeleton_img = visualize_3d_pose(corrected_pose)
-    correct_skeleton_img = resize_image(correct_skeleton_img, height=400)
-
-    merg_skeleton_img = cv2.hconcat([
-        master_skeleton_img,
-        correct_skeleton_img,
-        user_skeleton_img,
-    ])
-    merg_res_img = cv2.hconcat([
-        master_frame,
-        user_frame,
-    ])
-
-    merg_skeleton_img = resize_image(merg_skeleton_img, width=merg_res_img.shape[1])
-    merg_img = cv2.vconcat([
-        merg_res_img,
-        merg_skeleton_img[..., :3]
-    ])
-    merg_img = resize_image(merg_img, width=args.width)
-
-    return merg_img
-
 if __name__=="__main__":
 
     args = parse_args()
@@ -75,10 +44,11 @@ if __name__=="__main__":
 
         results, result_img = dope.run(image, visualize=args.visualize)
 
-        cv2.imshow("results image", result_img)
-        cv2.waitKey(0)
+        if args.visualize:
+            cv2.imshow("results image", result_img)
+            cv2.waitKey(0)
 
-        cv2.destroyAllWindows()
+            cv2.destroyAllWindows()
 
     else:
         master_cap = cv2.VideoCapture(args.m_video)
@@ -89,7 +59,7 @@ if __name__=="__main__":
 
         counter = 0
 
-        while(master_cap.isOpened()):
+        while master_cap.isOpened():
             master_ret, master_frame = master_cap.read()
             user_ret, user_frame = user_cap.read()
 
