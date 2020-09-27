@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
-from constants import *
+
+from dope_estimator.constants import *
 
 def get_rotation_matrix(v1, v2):
     rotation_matrix = np.eye(3)

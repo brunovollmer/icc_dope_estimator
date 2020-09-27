@@ -1,0 +1,3 @@
+[submodule "lib/lcrnet"]
+	path = lib/lcrnet
+	url = https://github.com/naver/lcrnet-v2-improved-ppi.git

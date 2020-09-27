@@ -1,10 +1,8 @@
-results/
-.idea/
-
 # Custom rules
 data/
 models/
 results/
+.idea/
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,linux,visualstudiocode
@@ -42,7 +40,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -163,10 +160,6 @@ dmypy.json
 
 ### VisualStudioCode ###
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/extensions.json
-*.code-workspace
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
