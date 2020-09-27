@@ -38,10 +38,13 @@ The list of models include:
 
 ## Using the code
 
+Currently a few different options are supported to run the code. 
+
+### Image
 To use our code on an image, use the following command:
 
 ```
-python dope.py --model <modelname> --image <imagename>
+python main.py --model <modelname> --image <imagename>
 ```
 
 with
@@ -50,16 +53,24 @@ with
 
 For instance, you can run
 ```
-python dope.py  --model DOPErealtime_v1_0_0 --image 015994080.jpg
+python main.py  --model DOPErealtime_v1_0_0 --image 015994080.jpg
 ```
 
-For videos run the following command:
+### Video
+If you want to compare two videos run the following command:
 
 ```
-python dope.py --model <modelname> --video <videoname>
+python  main.py --model <modelname> --video <videoname> -m_video <mastervideoname>
 ```
 with
 * `<modelname>`: name of model to use (eg DOPE_v1_0_0)
-* `<videoname>`: name of the video to test
+* `<videoname>`: name of the user video
+* `<mastervideoname>`: name of master video
 
-Our real-time models use half computation. In case your device cannot handle it, please add --no_half_comp flag!
+### Config
+
+Our real-time models use half computation. In case your device cannot handle it, please add `--no_half_comp` flag!
+
+If you want to visualize or save the visualized results add the `--visualize` and\or `--save_images` flag!
+
+
