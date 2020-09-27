@@ -1,6 +1,6 @@
 # Movement Coach Pose Estimation
 
-Pose Estimation model for the [ICC 2020](https://www.createchallenge.org/) submission of the Movement Coach team. The second part of the final submission can be found in [this repository](https://github.com/brunovollmer/icc_dope_server).
+Pose Estimation model for the [ICC 2020](https://www.createchallenge.org/) submission of the Movement Coach team. The second part of the final submission can be found in [this repository](https://github.com/brunovollmer/icc_dope_server). More information can be found on [DevPost](https://devpost.com/software/movement-coach).
 
 The pose estimation model is based on the Paper "DOPE: Distillation Of Part Experts for whole-body 3D pose estimation in the wild" and their [code](https://github.com/naver/dope).
 
